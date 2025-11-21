@@ -1,6 +1,29 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { getCurrentUser } from "../../lib/auth";
 
 export default function ProfilePage() {
+  const [user, setUser] = useState<{ email: string; name: string; memberSince: string } | null>(null);
+
+  useEffect(() => {
+    const currentUser = getCurrentUser();
+    setUser(currentUser || {
+      email: "micheal.p@gmail.com",
+      name: "Micheal Peers",
+      memberSince: "January 2025"
+    });
+  }, []);
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#F8F4EE] font-mono px-4 py-6 flex items-center justify-center">
+        <p className="text-[#2B2B2B]">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F8F4EE] font-mono px-4 py-6">
       <div className="max-w-4xl mx-auto">
@@ -48,9 +71,9 @@ export default function ProfilePage() {
 
             {/* User Info */}
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-[#2B2B2B] mb-1">Micheal Peers</h1>
-              <p className="text-[#6F6F6F] mb-2">micheal.p@gmail.com</p>
-              <p className="text-sm text-[#6F6F6F] mb-4">Member since January 2025</p>
+              <h1 className="text-2xl font-bold text-[#2B2B2B] mb-1">{user.name}</h1>
+              <p className="text-[#6F6F6F] mb-2">{user.email}</p>
+              <p className="text-sm text-[#6F6F6F] mb-4">Member since {user.memberSince}</p>
 
               {/* Favorite Genres */}
               <div className="mb-4">

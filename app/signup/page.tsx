@@ -1,7 +1,53 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { setAuthCookie } from "../../lib/auth";
 
 export default function SignupPage() {
+  const router = useRouter();
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+    const fullName = formData.get("fullName") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+    const privacy = formData.get("privacy");
+
+    // Validation
+    if (!fullName || !email || !password || !confirmPassword) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (!privacy) {
+      setError("Please accept the privacy policy and terms of service");
+      return;
+    }
+
+    // In a real app, this would create an account on the backend
+    // For demo purposes, set auth cookie and redirect
+    setAuthCookie({
+      email,
+      name: fullName,
+      memberSince: new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+    });
+
+    router.push("/discover");
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#F8F4EE] font-mono px-4 py-8">
       <main className="w-full max-w-md">
@@ -24,8 +70,15 @@ export default function SignupPage() {
           <p className="text-[#2B2B2B] text-sm">Join our community of book lovers &lt;3</p>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-red-100 border border-red-300 text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Signup Form */}
-        <form className="space-y-5 mb-6">
+        <form onSubmit={handleSubmit} className="space-y-5 mb-6">
           <div>
             <label htmlFor="fullName" className="block text-sm font-medium text-[#2B2B2B] mb-2">
               Full Name
@@ -35,6 +88,7 @@ export default function SignupPage() {
               id="fullName"
               name="fullName"
               placeholder="John Doe"
+              required
               className="w-full px-4 py-3 rounded-lg border border-[#B8B1A6] bg-[#FCFBF9] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#D6A55F] focus:border-transparent"
             />
           </div>
@@ -48,6 +102,7 @@ export default function SignupPage() {
               id="email"
               name="email"
               placeholder="you@example.com"
+              required
               className="w-full px-4 py-3 rounded-lg border border-[#B8B1A6] bg-[#FCFBF9] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#D6A55F] focus:border-transparent"
             />
           </div>
@@ -61,6 +116,7 @@ export default function SignupPage() {
               id="password"
               name="password"
               placeholder="Enter your password"
+              required
               className="w-full px-4 py-3 rounded-lg border border-[#B8B1A6] bg-[#FCFBF9] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#D6A55F] focus:border-transparent"
             />
           </div>
@@ -74,6 +130,7 @@ export default function SignupPage() {
               id="confirmPassword"
               name="confirmPassword"
               placeholder="Confirm your password"
+              required
               className="w-full px-4 py-3 rounded-lg border border-[#B8B1A6] bg-[#FCFBF9] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#D6A55F] focus:border-transparent"
             />
           </div>
@@ -83,6 +140,7 @@ export default function SignupPage() {
               type="checkbox"
               id="privacy"
               name="privacy"
+              required
               className="mt-1 w-4 h-4 text-[#D6A55F] border-[#B8B1A6] rounded focus:ring-[#D6A55F]"
             />
             <label htmlFor="privacy" className="text-sm text-[#2B2B2B]">

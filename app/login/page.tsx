@@ -1,9 +1,45 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { setAuthCookie } from "../../lib/auth";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    // Basic validation
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    // In a real app, this would validate against a backend
+    // For demo purposes, accept any email/password
+    setAuthCookie({
+      email,
+      name: email.split("@")[0],
+      memberSince: new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+    });
+
+    // Redirect to discover or the original destination
+    const redirect = searchParams.get("redirect") || "/discover";
+    router.push(redirect);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F8F4EE] font-mono px-4">
+    <div className="flex min-h-screen items-center justify-center bg-[#F8F4EE] font-mono px-4 py-6">
       <main className="w-full max-w-md">
         {/* Logo and Title */}
         <div className="flex flex-col items-center gap-4 mb-8">
@@ -24,8 +60,15 @@ export default function LoginPage() {
           <p className="text-[#2B2B2B] text-sm">Log in to conitnue your reading joruney</p>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 rounded-lg bg-red-100 border border-red-300 text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+
         {/* Login Form */}
-        <form className="space-y-6 mb-6">
+        <form onSubmit={handleSubmit} className="space-y-6 mb-6">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-[#2B2B2B] mb-2">
               Email
@@ -35,6 +78,7 @@ export default function LoginPage() {
               id="email"
               name="email"
               placeholder="you@example.com"
+              required
               className="w-full px-4 py-3 rounded-lg border border-[#B8B1A6] bg-[#FCFBF9] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#D6A55F] focus:border-transparent"
             />
           </div>
@@ -48,6 +92,7 @@ export default function LoginPage() {
               id="password"
               name="password"
               placeholder="Enter your password"
+              required
               className="w-full px-4 py-3 rounded-lg border border-[#B8B1A6] bg-[#FCFBF9] text-[#2B2B2B] focus:outline-none focus:ring-2 focus:ring-[#D6A55F] focus:border-transparent"
             />
           </div>
